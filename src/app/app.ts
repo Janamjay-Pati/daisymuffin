@@ -1,10 +1,11 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { WordGraphComponent } from './word-graph.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, WordGraphComponent],
   templateUrl: './app.html',
   styleUrls: ['./app.scss']
 })
@@ -60,4 +61,16 @@ export class App implements OnInit, OnDestroy {
   public next(): void { 
     this.current.update(i => (i + 1) % this.images.length);
   }
+
+  // example data to feed the graph
+  public readonly writingRows = [
+    { date: '20 Dec 2025', book: 'BTL', words: 0 },
+    { date: '20 Dec 2025', book: 'AURA', words: 0 },
+    { date: '21 Dec 2025', book: 'BTL', words: 0 },
+    { date: '21 Dec 2025', book: 'AURA', words: 800 },
+    { date: '22 Dec 2025', book: 'BTL', words: 1500 },
+    { date: '22 Dec 2025', book: 'AURA', words: 4700 },
+    { date: '23 Dec 2025', book: 'BTL', words: 2000 },
+    { date: '23 Dec 2025', book: 'AURA', words: 1200 }
+  ];
 }

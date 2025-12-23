@@ -1,0 +1,105 @@
+// Carousel styles
+.carousel {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  overflow: hidden;
+  padding: 2rem 0;
+}
+
+.carousel-track {
+  position: relative;
+  height: 450px;
+}
+
+.carousel-image {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  /* use height as primary dimension to enforce portrait orientation */
+  height: 85%;
+  aspect-ratio: 3 / 4; /* portrait (taller than wide) */
+  width: auto;
+  object-fit: cover;
+  opacity: 0;
+  transition: transform 500ms ease, opacity 300ms ease, filter 300ms ease;
+  pointer-events: none;
+}
+
+/* Center active slide (made larger and portrait) */
+.carousel-image.active {
+  opacity: 1;
+  height: 92%; /* slightly taller center */
+  aspect-ratio: 3 / 4;
+  z-index: 4;
+  pointer-events: auto;
+  transform: translateX(-50%) scale(1);
+  filter: none;
+}
+
+/* Left and right neighboring slides (portrait, smaller than center) */
+.carousel-image.prev,
+.carousel-image.next {
+  opacity: 0.7;
+  height: 68%; /* smaller height than center to appear recessed */
+  aspect-ratio: 3 / 4;
+  top: 16%;
+  pointer-events: auto;
+  border-radius: 12px;
+  object-fit: cover;
+  filter: blur(0.6px) saturate(0.9) brightness(0.92);
+  transform-origin: center center;
+}
+
+.carousel-image.prev {
+  transform: translateX(-160%) scale(0.86);
+  z-index: 2;
+}
+
+.carousel-image.next {
+  transform: translateX(60%) scale(0.86);
+  z-index: 2;
+}
+
+/* Hide non-neighboring slides */
+.carousel-image:not(.active):not(.prev):not(.next) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.4);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 2rem;
+}
+
+.nav.prev { left: 8px; }
+.nav.next { right: 8px; }
+
+.indicators {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+}
+
+.indicators button {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.2);
+  border: none;
+  cursor: pointer;
+}
+
+.indicators button.active { background: rgba(0,0,0,0.6); }

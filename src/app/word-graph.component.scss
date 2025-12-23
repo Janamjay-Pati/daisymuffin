@@ -1,1 +1,11 @@
-.word-graph { max-width: 900px; margin: 0 auto; }
+.word-graph {
+  width: 100%;
+  max-width: none; /* allow full width */
+  margin: 0 auto;
+}
+
+.word-graph canvas {
+  display: block;
+  width: 100% !important;
+  height: 320px; /* default height; can be changed by CSS or media queries */
+}

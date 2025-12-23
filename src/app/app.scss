@@ -6,6 +6,7 @@
   margin: 0 auto;
   overflow: hidden;
   padding: 2rem 0;
+  margin-bottom: 2.25rem; /* Ensure carousel has spacing below so graph never touches it */
 }
 
 .carousel-track {
@@ -103,3 +104,31 @@
 }
 
 .indicators button.active { background: rgba(0,0,0,0.6); }
+
+/* Responsive graph container (does not affect carousel) */
+.graph-section {
+  width: 100%;
+  max-width: 1000px;
+  margin: 2rem auto 3rem auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  background: transparent; /* keep background consistent */
+}
+
+/* Make the chart container and canvas fully responsive */
+.word-graph {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.word-graph canvas {
+  width: 100% !important;
+  height: auto !important; /* let Chart.js control pixel ratio but keep responsive */
+  display: block;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .graph-section { margin: 1rem auto 2rem auto; padding: 0 0.6rem; }
+}

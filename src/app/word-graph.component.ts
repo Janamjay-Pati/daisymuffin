@@ -14,11 +14,23 @@ type RawEntry = { date: string; book: string; words: number };
 export class WordGraphComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input() raw: RawEntry[] = [];
   @ViewChild('canvas', { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('container', { static: true }) container!: ElementRef<HTMLElement>;
 
   private chart?: Chart;
+  private resizeObserver?: ResizeObserver;
 
   ngAfterViewInit(): void {
     this.createChart();
+
+    // observe container size changes and trigger a chart resize
+    if (this.container && (window as any).ResizeObserver) {
+      this.resizeObserver = new ResizeObserver(() => {
+        // Chart.js handles scale recalculation on resize when responsive=true.
+        // We force a resize to ensure it stretches to the CSS width immediately.
+        if (this.chart) this.chart.resize();
+      });
+      this.resizeObserver.observe(this.container.nativeElement);
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -29,6 +41,7 @@ export class WordGraphComponent implements OnChanges, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.chart?.destroy();
+    this.resizeObserver?.disconnect();
   }
 
   private createChart(): void {
@@ -42,6 +55,7 @@ export class WordGraphComponent implements OnChanges, AfterViewInit, OnDestroy {
       data: { labels, datasets },
       options: {
         responsive: true,
+        maintainAspectRatio: false, // allow CSS to control height/width
         plugins: {
           legend: { position: 'top', labels: { color: '#000' } },
           tooltip: { titleColor: '#000', bodyColor: '#000' }
@@ -52,6 +66,9 @@ export class WordGraphComponent implements OnChanges, AfterViewInit, OnDestroy {
         }
       }
     });
+
+    // ensure initial sizing matches CSS container
+    setTimeout(() => this.chart?.resize(), 0);
   }
 
   private updateChart(): void {

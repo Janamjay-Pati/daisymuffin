@@ -1,7 +1,9 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WordGraphComponent } from './word-graph/word-graph.component';
+import { EditBook } from './edit-book/edit-book';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-root',
@@ -11,6 +13,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
   styleUrls: ['./app.scss']
 })
 export class App implements OnInit, OnDestroy {
+  constructor(private dialog: MatDialog) {}
+
   public readonly title = signal('Name');
 
   // Images used by the carousel (update paths as needed)
@@ -66,6 +70,20 @@ export class App implements OnInit, OnDestroy {
   editTheBook(index: number): void {
     console.log(`Editing the book for slide index: ${index}`);
     // Add your logic here to handle the "Edit The Book" action
+    this.dialog.open(EditBook, {
+      data: {
+        book: this.images[index],
+        name: 'Book ' + (index + 1),
+        description: 'Description for Book ' + (index + 1),
+        chapters: [
+          { chapterName: 'Chapter 1', isCompleted: true, isArchived: false },
+          { chapterName: 'Chapter 2', isCompleted: false, isArchived: false },
+          { chapterName: 'Chapter 3', isCompleted: false, isArchived: true }
+        ]
+      },
+      width: '1000px',
+      height: '600px'
+    });
   }
 
   // example data to feed the graph

@@ -1,11 +1,12 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { WordGraphComponent } from './word-graph.component';
+import { WordGraphComponent } from './word-graph/word-graph.component';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, WordGraphComponent],
+  imports: [CommonModule, WordGraphComponent, MatToolbarModule],
   templateUrl: './app.html',
   styleUrls: ['./app.scss']
 })

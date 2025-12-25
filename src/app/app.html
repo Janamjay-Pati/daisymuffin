@@ -1,3 +1,7 @@
+<mat-toolbar color="primary">
+  <span style="text-align: center; width: 100%;">Library</span>
+</mat-toolbar>
+
 <div class="carousel" (mouseenter)="pause()" (mouseleave)="resume()">
   <div class="carousel-track">
     <ng-container *ngFor="let img of images; let i = index">
@@ -29,6 +33,10 @@
             aria-label="Go to slide {{i}}"></button>
   </div>
 </div>
+
+<mat-toolbar color="primary">
+  <span style="text-align: center; width: 100%;">Weekly Insights</span>
+</mat-toolbar>
 
 <div class="graph-section">
   <word-graph [raw]="writingRows"></word-graph>

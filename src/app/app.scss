@@ -14,12 +14,10 @@
   height: 450px;
 }
 
+/* Make the image fill the wrapper; rounding comes from wrapper now */
 .carousel-image {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  /* use height as primary dimension to enforce portrait orientation */
   height: 85%;
   aspect-ratio: 3 / 4; /* portrait (taller than wide) */
   width: auto;
@@ -29,43 +27,65 @@
   pointer-events: none;
 }
 
-/* Center active slide (made larger and portrait) */
-.carousel-image.active {
-  opacity: 1;
-  height: 92%; /* slightly taller center */
-  aspect-ratio: 3 / 4;
-  z-index: 4;
-  pointer-events: auto;
+/* Wrapper around images: controls positioning, sizing and clipping */
+.carousel-slide {
+  position: absolute;
+  top: 0;
+  left: 50%;
   transform: translateX(-50%) scale(1);
+  transition: transform 500ms ease;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* clip overlay to image bounds */
+  border-radius: 12px;
+  height: 85%; /* default slide height (matches previous image default) */
+}
+
+/* Center active slide (larger) */
+.carousel-slide.active {
+  transform: translateX(-50%) scale(1);
+  z-index: 4;
+  height: 92%;
+  top: 0;
+}
+.carousel-slide.active img.carousel-image {
+  opacity: 1;
+  height: 100%; /* image fills wrapper */
+  pointer-events: auto;
+  transform: none;
   filter: none;
 }
 
-/* Left and right neighboring slides (portrait, smaller than center) */
-.carousel-image.prev,
-.carousel-image.next {
-  opacity: 0.7;
-  height: 68%; /* smaller height than center to appear recessed */
-  aspect-ratio: 3 / 4;
+/* Left and right neighbors */
+.carousel-slide.prev,
+.carousel-slide.next {
+  z-index: 2;
+  height: 68%;
   top: 16%;
+}
+
+.carousel-slide.prev {
+  transform: translateX(-160%) scale(0.86);
+}
+
+.carousel-slide.next {
+  transform: translateX(60%) scale(0.86);
+}
+
+.carousel-slide.prev img.carousel-image,
+.carousel-slide.next img.carousel-image {
+  opacity: 0.7;
+  height: 100%;
   pointer-events: auto;
-  border-radius: 12px;
   object-fit: cover;
   filter: blur(0.6px) saturate(0.9) brightness(0.92);
   transform-origin: center center;
 }
 
-.carousel-image.prev {
-  transform: translateX(-160%) scale(0.86);
-  z-index: 2;
-}
-
-.carousel-image.next {
-  transform: translateX(60%) scale(0.86);
-  z-index: 2;
-}
-
 /* Hide non-neighboring slides */
-.carousel-image:not(.active):not(.prev):not(.next) {
+.carousel-slide:not(.active):not(.prev):not(.next) img.carousel-image {
   opacity: 0;
   pointer-events: none;
 }
@@ -104,6 +124,77 @@
 }
 
 .indicators button.active { background: rgba(0,0,0,0.6); }
+
+/* wrapper around images to support overlay pseudo-element */
+.carousel-slide {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  width: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* enable pointer only on active slide via child */
+  cursor: pointer;
+}
+
+.carousel-slide img.carousel-image {
+  position: relative;
+  pointer-events: none; /* default; active slide will allow pointer-events via class on wrapper */
+}
+
+.carousel-slide.active,
+.carousel-slide.prev,
+.carousel-slide.next {
+  pointer-events: auto;
+}
+
+/* Use data-caption on wrapper for overlay content */
+.carousel-slide::after {
+  content: attr(data-caption);
+  position: absolute;
+  left: 3rem;
+  right: 3rem;
+  bottom: 2rem;
+  padding: 0.6rem 0.9rem;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%);
+  color: #fff;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 220ms ease, transform 220ms ease;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 2px solid #fff;
+}
+
+.carousel-slide.active::after,
+.carousel-slide.prev::after,
+.carousel-slide.next::after {
+  opacity: 1;
+  transform: translateY(0);
+  transition: none; /* make overlay appear instantly without animation */
+}
+
+.carousel-slide.prev::after,
+.carousel-slide.next::after {
+  font-size: 0.85rem;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 100%);
+}
+
+.carousel-slide::after {
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
 
 /* Responsive graph container (does not affect carousel) */
 .graph-section {

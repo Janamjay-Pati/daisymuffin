@@ -62,6 +62,11 @@ export class App implements OnInit, OnDestroy {
     this.current.update(i => (i + 1) % this.images.length);
   }
 
+  editTheBook(index: number): void {
+    console.log(`Editing the book for slide index: ${index}`);
+    // Add your logic here to handle the "Edit The Book" action
+  }
+
   // example data to feed the graph
   public readonly writingRows = [
     { date: '20 Dec 2025', book: 'BTL', words: 0 },

@@ -70,6 +70,11 @@
   transform: translateX(-50%);
   font-size: 0.9rem;
   color: #666;
+  background-color: white;
+  padding: 2px 6px;      /* optional: small padding for readability */
+  border-radius: 4px;    /* optional: subtle rounding */
+  white-space: nowrap;    /* prevent breaking the text */
+  z-index: 5;
 }
 
 .ql-container {
@@ -150,4 +155,58 @@ body.dark-mode {
 /* Remove extra bottom spacing */
 .mat-mdc-form-field.dense .mat-mdc-form-field-subscript-wrapper {
   display: none;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 768px) {
+
+  .ql-container {
+    height: calc(100vh - 10.25rem);
+  }
+
+  /* Toolbar wraps on smaller screens */
+  #custom-toolbar {
+    flex-wrap: wrap;              /* Allow buttons to wrap */
+    justify-content: flex-start;
+  }
+
+  /* Toolbar buttons and find/replace group full width */
+  #custom-toolbar .options,
+  #custom-toolbar .find-replace-group {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;                     /* Compact spacing */
+  }
+
+  /* Make buttons and input fields flexible */
+  #custom-toolbar .options button,
+  #custom-toolbar .find-replace-container mat-form-field {
+    flex: 1 1 auto;
+    min-width: 40px;              /* Prevent shrinking too small */
+  }
+
+  /* Stack find/replace inputs vertically */
+  .find-replace-container {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .find-replace-container mat-form-field {
+    width: 100%;                  /* Full width inputs */
+    margin-right: 0 !important;   /* Remove desktop margin */
+  }
+
+  /* Editor takes full width */
+  .editor-container {
+    width: 100%;
+  }
+
+  /* Chapter name and word count */
+  .chapter-name,
+  .word-count {
+    font-size: 0.8rem;
+    padding: 1px 4px;
+    bottom: 8px;
+  }
 }

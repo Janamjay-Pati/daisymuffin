@@ -1,7 +1,7 @@
 .image {
   aspect-ratio: 3 / 4;
   height: 350px;
-  width: 250px;
+  max-width: 100%;
   object-fit: cover;
   border-radius: 12px;
 }
@@ -10,6 +10,8 @@
   display: flex;
   gap: 20px;
   align-items: flex-start;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .image-section {
@@ -50,4 +52,72 @@
 
 .edit-image-btn:hover {
   background: rgba(0, 0, 0, 0.75);
+}
+
+/* Desktop / tablet */
+.actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+
+  /* Make table scroll instead of breaking */
+  table.mat-table {
+    display: block;
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  /* Reduce padding */
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  /* Stack action icons vertically if needed */
+  .actions-cell {
+    justify-content: center;
+    gap: 6px;
+  }
+
+  /* Reduce icon button size */
+  .actions-cell mat-icon {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* Stack image first, inputs below */
+  .form-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Center image and prevent overflow */
+  .image-section {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .image {
+    max-width: 90vw;
+    height: auto;
+  }
+
+  /* Inputs take full width below image */
+  .input-section {
+    width: 100%;
+  }
+
+  /* Kill any remaining horizontal scroll */
+  html, body {
+    overflow-x: hidden;
+  }
 }

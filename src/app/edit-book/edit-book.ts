@@ -20,10 +20,19 @@ import { DataService } from '../../services/data.service';
 export class EditBook {
     data = inject(MAT_DIALOG_DATA);
     bookImage!: string;
+    newChapterName: string = '';
     displayedColumns: string[] = ['chapterName', 'isCompleted', 'actions'];
+    datasource = this.data.chapters;
 
     constructor(private router: Router, private dialogRef: MatDialogRef<EditBook>, private dataService: DataService) {
       this.bookImage = this.data.book;
+    }
+
+    addNewChapter() {
+      this.datasource = [
+        ...this.datasource,
+        { name: this.newChapterName , content: '', isCompleted: false, isArchived: false }
+      ];
     }
 
     editChapter(element: any) {

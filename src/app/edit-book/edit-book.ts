@@ -19,9 +19,12 @@ import { DataService } from '../../services/data.service';
 })
 export class EditBook {
     data = inject(MAT_DIALOG_DATA);
+    bookImage!: string;
     displayedColumns: string[] = ['chapterName', 'isCompleted', 'actions'];
 
-    constructor(private router: Router, private dialogRef: MatDialogRef<EditBook>, private dataService: DataService) {}
+    constructor(private router: Router, private dialogRef: MatDialogRef<EditBook>, private dataService: DataService) {
+      this.bookImage = this.data.book;
+    }
 
     editChapter(element: any) {
       this.dataService.chapterData$.next({
@@ -30,6 +33,22 @@ export class EditBook {
       });
       this.close();
       this.router.navigate(['/editor']);
+    }
+
+    onImageSelected(event: Event) {
+      const input = event.target as HTMLInputElement;
+      if (!input.files || input.files.length === 0) return;
+
+      const file = input.files[0];
+
+      // Preview immediately
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.bookImage = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+
+      // 🔥 Later: upload to Firebase / Supabase here
     }
 
     close() {

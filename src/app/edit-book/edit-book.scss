@@ -27,3 +27,27 @@
     height: 220px;
     resize: vertical;
 }
+
+.image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.image-wrapper .image {
+  display: block;
+  border-radius: 8px;
+}
+
+/* Pencil icon overlay */
+.edit-image-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+  z-index: 2;
+}
+
+.edit-image-btn:hover {
+  background: rgba(0, 0, 0, 0.75);
+}

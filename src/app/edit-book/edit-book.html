@@ -19,7 +19,7 @@
     <table mat-table [dataSource]="data.chapters" class="mat-elevation-z8">
         <ng-container matColumnDef="chapterName">
             <th mat-header-cell *matHeaderCellDef style="width: 60%;">Chapter Name</th>
-            <td mat-cell *matCellDef="let element"> {{element.chapterName}} </td>
+            <td mat-cell *matCellDef="let element"> {{element.name}} </td>
         </ng-container>
 
         <ng-container matColumnDef="isCompleted">
@@ -32,8 +32,8 @@
         <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef style="width: 15%;"></th>
             <td mat-cell *matCellDef="let element">
-                <button mat-icon-button [disabled]="element.isArchived" [matTooltip]="'Edit Chapter'">
-                    <mat-icon style="cursor: pointer; margin-left: auto; margin-right: 1rem;" fontIcon="edit"></mat-icon>
+                <button mat-icon-button [disabled]="element.isArchived" [matTooltip]="'Edit Chapter'" (click)="editChapter(element)">
+                    <mat-icon style="cursor: pointer; margin-left: auto; margin-right: 1rem;" fontIcon="edit" c></mat-icon>
                 </button>
                 @if (!element.isArchived) {
                     <mat-icon style="cursor: pointer; margin-left: auto;" [matTooltip]="'Archive Chapter'" fontIcon="archive"></mat-icon>

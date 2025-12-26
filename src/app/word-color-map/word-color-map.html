@@ -1,0 +1,62 @@
+<h2 mat-dialog-title>Word Mapping</h2>
+<div mat-dialog-content>
+  <!-- List existing mappings -->
+  <div *ngIf="data?.wordColorMapList?.length">
+    <h3 style="margin-bottom: 8px;">Existing Mappings</h3>
+    <div
+      style="
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 8px;
+        max-height: 156px; /* 3 rows x ~52px per row */
+        overflow-y: auto;
+      "
+    >
+      <ng-container *ngFor="let map of data.wordColorMapList">
+        <div style="display: flex; align-items: center; gap: 8px; background: transparent; padding: 4px;">
+          <span style="font-weight: bold;">{{ map.word }}</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; background: transparent; padding: 4px;">
+          <input
+            type="color"
+            [(ngModel)]="map.color"
+            (change)="updateMappingColor(map)"
+            style="width: 32px; height: 32px; border: none; background: transparent; cursor: pointer;"
+          />
+          <span style="color: #888;">{{ map.color }}</span>
+        </div>
+      </ng-container>
+    </div>
+    <hr style="margin: 12px 0;">
+  </div>
+  <!-- Form for new mapping -->
+  <div style="display: flex; align-items: center; gap: 12px; position: relative;">
+    <mat-form-field appearance="fill" style="flex: 1;">
+      <mat-label>Word</mat-label>
+      <input matInput [(ngModel)]="word">
+    </mat-form-field>
+    <div style="position: relative;">
+      <button mat-icon-button type="button" [style.color]="selectedColor">
+        <mat-icon>palette</mat-icon>
+      </button>
+      <input
+        type="color"
+        [(ngModel)]="selectedColor"
+        style="
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 40px;
+          height: 40px;
+          opacity: 0;
+          cursor: pointer;
+        "
+      />
+    </div>
+  </div>
+</div>
+<div mat-dialog-actions class="actions">
+  <button mat-raised-button color="primary" (click)="save()">Save</button>
+  <button mat-button (click)="cancel()">Cancel</button>
+</div>

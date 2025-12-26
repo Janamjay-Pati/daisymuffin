@@ -1,0 +1,84 @@
+<div id="custom-toolbar">
+    <span class="go-back">
+        <button mat-icon-button (click)="onBackArrowClick(focusMode)">
+            <mat-icon>keyboard_arrow_left</mat-icon>
+        </button>
+    </span>
+    <span class="options" [ngStyle]="toolbarHidden ? {visibility: 'hidden'} : {}">
+        <button class="ql-bold" title="Bold"></button>
+        <button class="ql-italic" title="Italics"></button>
+        <button class="ql-underline" title="Underline"></button>
+        <button class="ql-blockquote" title="BlockQuote"></button>
+        <button class="ql-list" value="ordered" title="Numbered List"></button>
+        <button class="ql-list" value="bullet" title="Bullet List"></button>
+        <button class="ql-link" title="Add Link"></button>
+        <button class="ql-image" title="Add Image"></button>
+        <button class="ql-strike" title="Strikethrough"></button>
+        <button class="ql-clean" title="Remove all effects"></button>
+        <button mat-icon-button type="button" style="width: 28px; height: 28px; padding: 2px;" (click)="undo()" mat-icon-button>
+            <mat-icon>undo</mat-icon>
+        </button>
+        <button mat-icon-button type="button" style="width: 28px; height: 28px; padding: 2px;" (click)="redo()" mat-icon-button>
+            <mat-icon>redo</mat-icon>
+        </button>
+        <button mat-icon-button type="button" style="width: 28px; height: 28px; padding: 0;" (click)="save()">
+            <mat-icon>save</mat-icon>
+        </button>
+        <button mat-icon-button type="button" style="width: 28px; height: 28px; padding: 0;" (click)="addWordMapping()">
+            <mat-icon>map</mat-icon>
+        </button>
+        <button mat-icon-button type="button" style="width: 28px; height: 28px; padding: 0;" (click)="exportToGoogleDocs()" title="Export to Google Docs">
+            <mat-icon>description</mat-icon>
+        </button>
+        <button mat-icon-button type="button" style="width: 28px; height: 28px; padding: 0;" (click)="exportToEPUB()" title="Export to EPUB">
+            <mat-icon>menu_book</mat-icon>
+        </button>
+        <button mat-icon-button type="button" style="width: 28px; height: 28px; padding: 0;" (click)="toggleDarkMode()" mat-icon-button [title]="darkMode ? 'Light Mode' : 'Dark Mode'">
+            <mat-icon>{{ darkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+        <button mat-icon-button type="button" style="width: 28px; height: 28px; padding: 0;" (click)="toggleFocusMode()" [ngStyle]="focusMode ? {display: 'none'} : {display: 'inline-block'}" title="Enter Focus Mode">
+            <mat-icon>fullscreen</mat-icon>
+        </button>
+        <button mat-icon-button type="button" style="width: 28px; height: 28px; padding: 0; margin-right: 0.5rem;" (click)="toggleFindAndReplace()">
+            <mat-icon>find_replace</mat-icon>
+        </button>
+        <span class="find-replace-group" [ngStyle]="isFindAndReplaceActive ? {display: 'inline-block'} : {display: 'none'}">
+          <div class="find-replace-container">
+            <mat-form-field appearance="outline" class="dense" style="margin-right: 1rem;">
+              <input matInput placeholder="Find..." #findInput>
+              <button mat-icon-button matSuffix type="button" (click)="findText(findInput.value)" color="primary" title="Find">
+                <mat-icon style="margin-left: -1rem;">search</mat-icon>
+              </button>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="dense">
+              <input matInput placeholder="Replace..." #replaceInput>
+              <button mat-icon-button matSuffix type="button" (click)="replaceText(findInput.value, replaceInput.value)" color="accent" title="Replace">
+                <mat-icon style="margin-left: -1rem;">find_replace</mat-icon>
+              </button>
+            </mat-form-field>
+          </div>
+        </span>
+    </span>
+    <span class="open-options" [ngStyle]="!focusMode ? {visibility: 'hidden'} : {}">
+        <button mat-icon-button (click)="openOptions()">
+            <mat-icon>more_vert</mat-icon>
+        </button>
+    </span>
+</div>
+
+<div class="chapter-name">
+    {{ chapterName }}
+</div>
+  
+<div [class.focus-mode]="focusMode" class="editor-container">
+<quill-editor
+    class="editor"
+    [(ngModel)]="content"
+    [modules]="modules"
+    (onContentChanged)="onContentChanged()">
+</quill-editor>
+</div>
+  
+<div class="word-count">
+{{ wordCount }} words • {{ charCount }} characters
+</div>

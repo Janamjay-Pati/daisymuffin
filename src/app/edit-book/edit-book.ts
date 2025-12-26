@@ -8,6 +8,8 @@ import {MatTableModule} from '@angular/material/table';
 import {MatIconModule} from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {Router} from '@angular/router';
+import { DataService } from '../../services/data.service';
 
 @Component({
   selector: 'app-edit-book',
@@ -19,7 +21,16 @@ export class EditBook {
     data = inject(MAT_DIALOG_DATA);
     displayedColumns: string[] = ['chapterName', 'isCompleted', 'actions'];
 
-    constructor(private dialogRef: MatDialogRef<EditBook>) {}
+    constructor(private router: Router, private dialogRef: MatDialogRef<EditBook>, private dataService: DataService) {}
+
+    editChapter(element: any) {
+      this.dataService.chapterData$.next({
+        name: element.name,
+        content: element.content
+      });
+      this.close();
+      this.router.navigate(['/editor']);
+    }
 
     close() {
       this.dialogRef.close('closed');

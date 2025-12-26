@@ -42,3 +42,49 @@
   <word-graph [raw]="writingRows"></word-graph>
 </div>
 
+<mat-toolbar color="primary">
+  <span style="text-align: center; width: 100%;">Add New Book</span>
+</mat-toolbar>
+
+<div class="add-book-container">
+  <div class="add-book-section">
+    <div class="form-container">
+        <div class="image-section image-wrapper">
+        <img class="image" [src]="newBookImage" loading="lazy" />
+
+        <!-- Upload overlay -->
+        <button
+            mat-icon-button
+            class="edit-image-btn"
+            type="button"
+            (click)="fileInput.click()"
+            matTooltip="Change image"
+        >
+            <mat-icon>upload</mat-icon>
+        </button>
+
+        <!-- Hidden file input -->
+        <input
+            type="file"
+            accept="image/*"
+            hidden
+            #fileInput
+            (change)="onImageSelected($event)"
+        />
+        </div>
+        <div class="input-section">
+            <mat-form-field>
+                <mat-label>Book Name</mat-label>
+                <input matInput placeholder="Book Name*" [(ngModel)]="newBookName" />
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>Description</mat-label>
+                <textarea matInput placeholder="Description" [(ngModel)]="newBookDescription"></textarea>
+            </mat-form-field>
+        </div>
+    </div>
+    <div class="add-button-section">
+        <button mat-raised-button color="primary" (click)="addNewBook()" [disabled]="!newBookName">Add Book</button>
+    </div>
+  </div>
+</div>

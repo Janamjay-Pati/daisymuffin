@@ -4,10 +4,16 @@ import { WordGraphComponent } from './../word-graph/word-graph.component';
 import { EditBook } from './../edit-book/edit-book';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatFormField } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, WordGraphComponent, MatToolbarModule],
+  imports: [CommonModule, WordGraphComponent, MatToolbarModule, MatIconModule, MatButtonModule, MatTooltipModule, MatFormField, FormsModule, MatInputModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -15,6 +21,12 @@ export class Dashboard {
   constructor(private dialog: MatDialog) {}
 
   public readonly title = signal('Name');
+
+  newBookName: string = '';
+
+  newBookDescription: string = '';
+
+  newBookImage: string = 'assets/Upload.png';
 
   // Images used by the carousel (update paths as needed)
   public readonly images = ['assets/Pic1.jpeg', 'assets/Pic2.jpeg', 'assets/Pic3.jpeg', 'assets/Pic4.jpeg', 'assets/Pic5.jpeg'];
@@ -31,6 +43,31 @@ export class Dashboard {
 
   ngOnDestroy(): void {
     this.stop();
+  }
+
+  onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+
+    // Preview immediately
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.newBookImage = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+
+    // 🔥 Later: upload to Firebase / Supabase here
+  }
+
+  addNewBook(): void {
+    console.log('Adding new book:', this.newBookName, this.newBookDescription, this.newBookImage);
+    // Add your logic here to handle the addition of a new book
+    // Reset the form fields after adding the book
+    this.newBookName = '';
+    this.newBookDescription = '';
+    this.newBookImage = 'assets/Upload.png';
   }
 
   private start(): void {

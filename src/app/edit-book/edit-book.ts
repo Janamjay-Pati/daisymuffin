@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import {MatButtonModule} from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -10,7 +10,6 @@ import { CommonModule } from '@angular/common';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {Router} from '@angular/router';
 import { DataService } from '../../services/data.service';
-import { ChangeDetectorRef } from '@angular/core';
 import { SupabaseService } from '../../services/supabase.service';
 
 interface Chapter {
@@ -41,10 +40,10 @@ export class EditBook {
         name: row.name,
         content: row.content,
         wordCount: row.word_count,
-        isCompleted: row.is_completed,
-        isArchived: row.is_archived
+        isCompleted: row.isCompleted,
+        isArchived: row.isArchived
       }));
-      this.bookImage = this.data.book;
+      this.bookImage = this.data.coverImage;
     }
 
     async addNewChapter() {
@@ -152,7 +151,7 @@ export class EditBook {
 
     async updateBookName() {
       const bookId = this.data.bookId;
-      const newName = this.data.book; // take current ngModel value
+      const newName = this.data.name; // take current ngModel value
       if (!bookId || !newName.trim()) return;
 
       const { error } = await this.supabaseService.client
@@ -197,6 +196,7 @@ export class EditBook {
       } else {
         chapter.isCompleted = newStatus; // Update local UI immediately
       }
+      this.cdr.detectChanges();
     }
 
     async toggleChapterArchive(chapter: any) {

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WordGraphComponent } from './../word-graph/word-graph.component';
 import { EditBook } from './../edit-book/edit-book';
@@ -30,7 +30,7 @@ type DailyBookStatRow = {
   styleUrl: './dashboard.scss',
 })
 export class Dashboard {
-  constructor(private dialog: MatDialog, private supabaseService: SupabaseService, private router: Router) {}
+  constructor(private dialog: MatDialog, private supabaseService: SupabaseService, private router: Router, private cdr: ChangeDetectorRef) {}
 
   writingRows: any[] = [];
 
@@ -91,6 +91,7 @@ export class Dashboard {
     }
 
     this.images = data?.map(book => book.cover_image || 'assets/Upload.png') || [];
+    this.cdr.detectChanges();
   }
   
   async refreshGraph() {
@@ -147,15 +148,32 @@ async addNewBook(): Promise<void> {
   }
 
   try {
-    // 1️⃣ Insert book
+    const { data: session } =
+      await this.supabaseService.client.auth.getSession();
+
+    if (!session.session) {
+      console.error('No active session');
+      return;
+    }
+
+    const { data: sessionData, error: sessionError } = await this.supabaseService.client.auth.getUser();
+
+    if (sessionError || !sessionData?.user) {
+      console.error('No logged-in user');
+      return;
+    }
+
+    const userId = sessionData.user.id;
+
     const { data, error } = await this.supabaseService.client
       .from('books')
       .insert([{
         title: this.newBookName,
-        description: this.newBookDescription
+        description: this.newBookDescription,
+        user_id: userId
       }])
       .select()
-      .single(); // return the inserted row
+      .single();
 
     if (error || !data) {
       console.error('Error adding new book:', error);
@@ -196,7 +214,7 @@ async addNewBook(): Promise<void> {
     await this.fetchBookImages();
     const books = await this.fetchBooks();
     this.writingRows = await this.getWeeklyWritingRows(books);
-
+    this.cdr.detectChanges();
   } catch (e) {
     console.error('Error in addNewBook:', e);
   }
@@ -260,7 +278,7 @@ async addNewBook(): Promise<void> {
       const { data: chapters, error: chapterError } =
         await this.supabaseService.client
           .from('chapters')
-          .select('id, name, content, is_completed, is_archived')
+          .select('id, name, content, word_count, is_completed, is_archived')
           .eq('book_id', book.id)
           .order('created_at');
 
@@ -282,6 +300,7 @@ async addNewBook(): Promise<void> {
             id: ch.id,
             name: ch.name,
             content: ch.content,
+            wordCount: ch.word_count,
             isCompleted: ch.is_completed,
             isArchived: ch.is_archived
           }))

@@ -109,6 +109,7 @@ export class Editor implements OnInit, OnDestroy {
 
     this.chapterName = data.name;
     this.content = data.content || '';
+    this.cdr.detectChanges();
 
     // ✅ Now that bookId exists, load highlights
     await this.highlightMapping();

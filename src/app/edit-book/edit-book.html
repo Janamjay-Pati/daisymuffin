@@ -54,7 +54,6 @@
                 <button mat-icon-button (click)="toggleChapterCompletion(element)">
                     <mat-icon 
                         [ngStyle]="{'color': element.isCompleted ? 'green' : 'grey'}" 
-                        style="margin-left: 2rem;" 
                         fontIcon="check_circle"
                         [matTooltip]="element.isCompleted ? 'Mark as Incomplete' : 'Mark as Complete'">
                     </mat-icon>

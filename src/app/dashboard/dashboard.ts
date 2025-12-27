@@ -204,6 +204,8 @@ async addNewBook(): Promise<void> {
 
   private start(): void {
     if (this.intervalId != null) return;
+    if (this.images.length === 0) return; // 👈 IMPORTANT
+
     this.intervalId = window.setInterval(() => {
       this.current.update(i => (i + 1) % this.images.length);
     }, this.intervalMs);
@@ -228,10 +230,13 @@ async addNewBook(): Promise<void> {
   public goTo(i: number): void { 
     this.current.set(i);
   }
-  public prev(): void { 
+  public prev(): void {
+    if (this.images.length === 0) return;
     this.current.update(i => (i - 1 + this.images.length) % this.images.length);
   }
-  public next(): void { 
+
+  public next(): void {
+    if (this.images.length === 0) return;
     this.current.update(i => (i + 1) % this.images.length);
   }
 

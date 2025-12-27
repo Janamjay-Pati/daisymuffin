@@ -299,6 +299,31 @@
   text-align: right;
 }
 
+.empty-carousel {
+  height: 260px;
+  margin: 24px auto;
+  padding: 24px;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  color: #fafafa;
+
+  p {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: #fafafa;
+  }
+
+  span {
+    font-size: 14px;
+    color: #fafafa;
+  }
+}
+
 /* Mobile adjustments */
 @media (max-width: 600px) {
   .graph-section { margin: 1rem auto 2rem auto; padding: 0 0.6rem; }
@@ -307,6 +332,20 @@
     flex-direction: column;  /* stack image & form */
     align-items: stretch;
     width: 100%;
+  }
+
+  .empty-carousel {
+    min-height: 200px;
+    margin: 16px;
+    padding: 20px;
+
+    p {
+      font-size: 18px;
+    }
+
+    span {
+      font-size: 13px;
+    }
   }
 
   .image-section {

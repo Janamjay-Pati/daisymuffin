@@ -1,5 +1,5 @@
 <mat-toolbar color="primary">
-  <span style="text-align: center; width: 100%;">Library</span>
+  <span style="text-align: center; width: 100%;margin-left: 3rem;">Library</span>
   <span style="text-align: right;">
     <button mat-icon-button [matTooltip]="'Logout'" (click)="logout()">
         <mat-icon style="cursor: pointer; margin-right: 1rem; color: white;" fontIcon="logout" c></mat-icon>
@@ -7,37 +7,46 @@
   </span>
 </mat-toolbar>
 
-<div class="carousel" (mouseenter)="pause()" (mouseleave)="resume()">
-  <div class="carousel-track">
-    <ng-container *ngFor="let img of images; let i = index">
-      <div
-        class="carousel-slide"
+@if (images.length > 0) {
+  <div class="carousel" (mouseenter)="pause()" (mouseleave)="resume()">
+    <div class="carousel-track">
+      <ng-container *ngFor="let img of images; let i = index">
+        <div
+          class="carousel-slide"
+          [class.active]="current() === i"
+          [class.prev]="i === (current() - 1 + images.length) % images.length"
+          [class.next]="i === (current() + 1) % images.length"
+          [attr.data-caption]="'Edit The Book'"
+          (click)="editTheBook(i)"
+        >
+          <img
+            class="carousel-image"
+            [attr.src]="img"
+            [attr.alt]="'slide-' + i"
+            loading="lazy"
+          />
+        </div>
+      </ng-container>
+    </div>
+
+    <button class="nav prev" (click)="prev()">‹</button>
+    <button class="nav next" (click)="next()">›</button>
+
+    <div class="indicators">
+      <button
+        *ngFor="let _ of images; let i = index"
+        (click)="goTo(i)"
         [class.active]="current() === i"
-        [class.prev]="i === (current() - 1 + images.length) % images.length"
-        [class.next]="i === (current() + 1) % images.length"
-        [attr.data-caption]="'Edit The Book'"
-        (click)="editTheBook(i)"
-      >
-        <img
-          class="carousel-image"
-          [attr.src]="img"
-          [attr.alt]="'slide-' + i"
-          loading="lazy"
-        />
-      </div>
-    </ng-container>
+      ></button>
+    </div>
   </div>
-
-  <button class="nav prev" (click)="prev()" aria-label="Previous">‹</button>
-  <button class="nav next" (click)="next()" aria-label="Next">›</button>
-
-  <div class="indicators">
-    <button *ngFor="let _ of images; let i = index"
-            (click)="goTo(i)"
-            [class.active]="current() === i"
-            aria-label="Go to slide {{i}}"></button>
+} @else {
+  <div class="empty-carousel">
+    <p>No books yet 📚</p>
+    <span>Add your first book to get started</span>
   </div>
-</div>
+}
+
 
 <mat-toolbar color="primary">
   <span style="text-align: center; width: 100%;">Weekly Insights</span>

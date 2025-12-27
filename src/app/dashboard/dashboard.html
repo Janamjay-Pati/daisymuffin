@@ -1,5 +1,10 @@
 <mat-toolbar color="primary">
   <span style="text-align: center; width: 100%;">Library</span>
+  <span style="text-align: right;">
+    <button mat-icon-button [matTooltip]="'Logout'" (click)="logout()">
+        <mat-icon style="cursor: pointer; margin-right: 1rem; color: white;" fontIcon="logout" c></mat-icon>
+    </button>
+  </span>
 </mat-toolbar>
 
 <div class="carousel" (mouseenter)="pause()" (mouseleave)="resume()">

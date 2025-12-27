@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from "@angular/router";
+import { SupabaseService } from './../services/supabase.service';
 
 @Component({
   selector: 'app-root',
@@ -9,6 +10,17 @@ import { RouterOutlet } from "@angular/router";
   styleUrls: ['./app.scss']
 })
 export class App implements OnInit {
+  user: any;
 
-  ngOnInit(): void {}
+  constructor(private supabaseService: SupabaseService) {}
+
+  ngOnInit() {
+    // Listen for login/logout events
+    this.supabaseService.onAuthChange(user => {
+      this.user = user;
+    });
+
+    // Restore session on page reload
+    this.supabaseService.getSession().then(user => this.user = user);
+  }
 }

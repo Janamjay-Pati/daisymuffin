@@ -10,6 +10,17 @@ import { CommonModule } from '@angular/common';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {Router} from '@angular/router';
 import { DataService } from '../../services/data.service';
+import { ChangeDetectorRef } from '@angular/core';
+import { SupabaseService } from '../../services/supabase.service';
+
+interface Chapter {
+  id: string;
+  name: string;
+  content: string;
+  wordCount: number;
+  isCompleted: boolean;
+  isArchived: boolean;
+}
 
 @Component({
   selector: 'app-edit-book',
@@ -22,29 +33,66 @@ export class EditBook {
     bookImage!: string;
     newChapterName: string = '';
     displayedColumns: string[] = ['chapterName', 'isCompleted', 'actions'];
-    datasource = this.data.chapters;
+    datasource: Chapter[] = [];
 
-    constructor(private router: Router, private dialogRef: MatDialogRef<EditBook>, private dataService: DataService) {
+    constructor(private router: Router, private dialogRef: MatDialogRef<EditBook>, private dataService: DataService, private cdr: ChangeDetectorRef, private supabaseService: SupabaseService) {
+      this.datasource = this.data.chapters.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        content: row.content,
+        wordCount: row.word_count,
+        isCompleted: row.is_completed,
+        isArchived: row.is_archived
+      }));
       this.bookImage = this.data.book;
     }
 
-    addNewChapter() {
+    async addNewChapter() {
+      if (!this.newChapterName.trim()) return;
+
+      const bookId = this.data.bookId;
+
+      const { data, error } = await this.supabaseService.client
+        .from('chapters')
+        .insert([{
+          book_id: bookId,
+          name: this.newChapterName,
+          content: '',
+          word_count: 0,
+          is_completed: false,
+          is_archived: false
+        }])
+        .select()
+        .single();
+
+      if (error || !data) {
+        console.error('Error adding chapter:', error);
+        return;
+      }
+
       this.datasource = [
         ...this.datasource,
-        { name: this.newChapterName , content: '', isCompleted: false, isArchived: false }
+        {
+          id: data.id,
+          name: data.name,
+          content: data.content,
+          wordCount: data.word_count,
+          isCompleted: data.is_completed,
+          isArchived: data.is_archived
+        }
       ];
+
+      this.newChapterName = '';
+      this.cdr.detectChanges();
     }
 
-    editChapter(element: any) {
-      this.dataService.chapterData$.next({
-        name: element.name,
-        content: element.content
-      });
+    editChapter(chapter: any) {
+      const bookId = this.data.bookId;
+      this.router.navigate(['/editor'], { queryParams: { bookId, chapterId: chapter.id } });
       this.close();
-      this.router.navigate(['/editor']);
     }
 
-    onImageSelected(event: Event) {
+    async onImageSelected(event: Event) {
       const input = event.target as HTMLInputElement;
       if (!input.files || input.files.length === 0) return;
 
@@ -54,14 +102,122 @@ export class EditBook {
       const reader = new FileReader();
       reader.onload = () => {
         this.bookImage = reader.result as string;
+        this.cdr.detectChanges();
       };
       reader.readAsDataURL(file);
 
-      // 🔥 Later: upload to Firebase / Supabase here
+      const bookId = this.data.bookId;
+      if (!bookId) return;
+
+      try {
+        // Upload to Supabase storage
+        const { error: uploadError } = await this.supabaseService.client.storage
+          .from('book-covers')
+          .upload(`book-${bookId}.png`, file, {
+            cacheControl: '3600',
+            upsert: true
+          });
+
+        if (uploadError) {
+          console.error('Error uploading image:', uploadError);
+          return;
+        }
+
+        // Get public URL
+        const { data } = this.supabaseService.client.storage
+          .from('book-covers')
+          .getPublicUrl(`book-${bookId}.png`);
+
+        if (!data?.publicUrl) {
+          console.error('Error getting public URL');
+          return;
+        }
+
+        const publicUrl = data.publicUrl;
+        this.bookImage = publicUrl;
+
+        // **Update the book record in Supabase**
+        const { error: updateError } = await this.supabaseService.client
+          .from('books')
+          .update({ cover_image: publicUrl })
+          .eq('id', bookId);
+
+        if (updateError) {
+          console.error('Error updating book cover_image:', updateError);
+        }
+      } catch (e) {
+        console.error('Error handling image upload:', e);
+      }
+    }
+
+    async updateBookName() {
+      const bookId = this.data.bookId;
+      const newName = this.data.book; // take current ngModel value
+      if (!bookId || !newName.trim()) return;
+
+      const { error } = await this.supabaseService.client
+        .from('books')
+        .update({ title: newName })
+        .eq('id', bookId);
+
+      if (error) {
+        console.error('Error updating book name:', error);
+      } else {
+        console.log('Book name updated successfully');
+      }
+    }
+
+    async updateBookDescription() {
+      const bookId = this.data.bookId;
+      const newDescription = this.data.description; // use ngModel value
+      if (!bookId) return;
+
+      const { error } = await this.supabaseService.client
+        .from('books')
+        .update({ description: newDescription })
+        .eq('id', bookId);
+
+      if (error) {
+        console.error('Error updating book description:', error);
+      } else {
+        console.log('Book description updated successfully');
+      }
+    }
+
+    async toggleChapterCompletion(chapter: any) {
+      const newStatus = !chapter.isCompleted;
+
+      const { error } = await this.supabaseService.client
+        .from('chapters')
+        .update({ is_completed: newStatus })
+        .eq('id', chapter.id);
+
+      if (error) {
+        console.error('Error updating chapter completion:', error);
+      } else {
+        chapter.isCompleted = newStatus; // Update local UI immediately
+      }
+    }
+
+    async toggleChapterArchive(chapter: any) {
+      const newStatus = !chapter.isArchived;
+
+      const { error } = await this.supabaseService.client
+        .from('chapters')
+        .update({ is_archived: newStatus })
+        .eq('id', chapter.id);
+
+      if (error) {
+        console.error('Error updating chapter archive status:', error);
+        return;
+      }
+
+      // Update UI immediately
+      chapter.isArchived = newStatus;
     }
 
     close() {
-      this.dialogRef.close('closed');
+      this.dialogRef.close();
     }
 
 }

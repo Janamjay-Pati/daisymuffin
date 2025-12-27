@@ -1,12 +1,10 @@
-import { Component, ViewChild, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewChild, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { saveAs } from 'file-saver';
 import { FormsModule } from '@angular/forms';
 import { QuillEditorComponent } from 'ngx-quill';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, ActivatedRoute } from '@angular/router';
-import { collection, doc, getDocs, updateDoc } from 'firebase/firestore';
-import { db } from './../../services/firebase.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { WordColorMap } from './../word-color-map/word-color-map';
@@ -16,18 +14,28 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { ViewEncapsulation } from '@angular/core';
-import { DataService } from '../../services/data.service';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-editor',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, QuillEditorComponent],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
+    QuillEditorComponent
+  ],
   templateUrl: './editor.html',
-  styleUrl: './editor.scss',
+  styleUrls: ['./editor.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class Editor implements OnInit {
+export class Editor implements OnInit, OnDestroy {
   content = '';
+  bookId: string | null = null;     // Supabase ID of the book
+  chapterId: string | null = null;  // Supabase ID of the chapter
   selectedColor = '#000000';
   isFindAndReplaceActive = false;
   toolbarHidden = false;
@@ -45,10 +53,10 @@ export class Editor implements OnInit {
   focusMode = false;
   wordCount = 0;
   charCount = 0;
+  isSaving = false;
   bookTitle = '';
   chapterName = '';
-  chapterDocId: string | null = null;
-  bookDocId: string | null = null;
+  // Removed chapterDocId and bookDocId (Firebase-specific)
   selectedHighlight: string = '#ffff00'; // Default highlight color (yellow)
   wordColorMap: { [word: string]: string } = {};
   wordColorMapList: { id: string, word: string, color: string }[] = [];
@@ -59,22 +67,17 @@ export class Editor implements OnInit {
     private route: ActivatedRoute,
     private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef,
-    private dataService: DataService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private supabaseService: SupabaseService
   ) {}
 
   ngOnInit() {
-    // Listen to changes and update word/char count
-    setInterval(() => {
-      const text = this.stripHtml(this.content || '');
-      this.wordCount = text.trim().split(/\s+/).filter(w => w).length;
-      this.charCount = text.length;
-    }, 500);
+    this.route.queryParams.subscribe(params => {
+      this.bookId = params['bookId'];
+      this.chapterId = params['chapterId'];
 
-    this.dataService.chapterData$.subscribe(chapter => {
-      if (chapter) {
-        this.chapterName = chapter.name;
-        this.content = chapter.content;
+      if (this.bookId && this.chapterId) {
+        this.loadChapterByIds(this.bookId, this.chapterId);
       }
     });
 
@@ -85,11 +88,35 @@ export class Editor implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
 
-    this.highlightMapping();
+  ngOnDestroy() {
+    document.removeEventListener('fullscreenchange', () => {});
+  }
+
+  async loadChapterByIds(bookId: string, chapterId: string) {
+    const { data, error } = await this.supabaseService.client
+      .from('chapters')
+      .select('content, name')
+      .eq('id', chapterId)
+      .eq('book_id', bookId)
+      .single();
+
+    if (error || !data) {
+      this.snackBar.open('Chapter not found', 'Dismiss', { duration: 3000 });
+      return;
+    }
+
+    this.chapterName = data.name;
+    this.content = data.content || '';
+
+    // ✅ Now that bookId exists, load highlights
+    await this.highlightMapping();
   }
 
   async highlightMapping() {
+    if (!this.bookId) return;
+
     this.wordColorMapList = await this.getWordColorMapList();
     await this.highlightMappedWords();
   }
@@ -162,18 +189,29 @@ export class Editor implements OnInit {
   }
 
   async save() {
-    if (this.bookDocId && this.chapterDocId) {
-      const chapterRef = doc(db, 'Books', this.bookDocId, 'chapters', this.chapterDocId);
-      await updateDoc(chapterRef, { content: this.content });
-      this.snackBar.open('Chapter saved successfully!', 'Dismiss', {
-        duration: 3000,
-        panelClass: ['success-snackbar']
-      });
+    if (!this.chapterId || !this.bookId || this.isSaving) return;
+
+    this.isSaving = true;
+
+    const plainText = this.stripHtml(this.content || '');
+    const wordCount = plainText.trim().split(/\s+/).filter(Boolean).length;
+
+    const { error } = await this.supabaseService.client
+      .from('chapters')
+      .update({
+        content: this.content,
+        word_count: wordCount,
+        updated_at: new Date()
+      })
+      .eq('id', this.chapterId)
+      .eq('book_id', this.bookId);
+
+    this.isSaving = false;
+
+    if (error) {
+      this.snackBar.open('Error saving chapter', 'Dismiss', { duration: 3000 });
     } else {
-      this.snackBar.open('Error saving chapter. Please try again.', 'Dismiss', {
-        duration: 3000,
-        panelClass: ['error-snackbar']
-      });
+      this.snackBar.open('Chapter saved', 'Dismiss', { duration: 2000 });
     }
   }
 
@@ -193,10 +231,14 @@ export class Editor implements OnInit {
 
   private isHighlighting = false;
 
-  async onContentChanged() {
-    if (this.isHighlighting) return;
-    this.wordColorMapList = await this.getWordColorMapList();
-    await this.highlightMappedWords();
+  onContentChanged() {
+    const text = this.stripHtml(this.content || '');
+    this.wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+    this.charCount = text.length;
+
+    if (!this.isHighlighting) {
+      this.highlightMapping();
+    }
   }
 
   highlightMappedWords() {
@@ -210,7 +252,7 @@ export class Editor implements OnInit {
     let index = 0;
 
     // Remove previous highlights
-    quillEditor.formatText(0, text.length, { background: false });
+    quillEditor.formatText(0, text.length, { background: null }, 'silent');
 
     Object.entries(this.wordColorMap).forEach(([word, color]) => {
       const regex = new RegExp(`\\b${word}\\b`, 'gi');
@@ -229,7 +271,7 @@ export class Editor implements OnInit {
     const latestWordColorMapList = await this.getWordColorMapList();
     this.dialog.open(WordColorMap, {
       width: '500px',
-      data: { bookDocId: this.bookDocId, wordColorMapList: latestWordColorMapList }
+      data: { bookId: this.bookId, wordColorMapList: latestWordColorMapList }
     }).afterClosed().subscribe(async (result) => {
       if (result) {
         // Update the wordColorMap with the new mapping
@@ -242,13 +284,15 @@ export class Editor implements OnInit {
   }
 
   async getWordColorMapList() {
-    if (!this.bookDocId) return [];
-    const wordMapSnapshot = await getDocs(collection(db, 'Books', this.bookDocId, 'WordMap'));
-    const wordColorMapList: { id: string, word: string, color: string }[] = [];
-    wordMapSnapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      wordColorMapList.push({ id: docSnap.id, word: data['word'], color: data['color'] });
-    });
+    // This method should be updated to fetch from Supabase using bookId, not Firebase.
+    if (!this.bookId) return [];
+    // Example: fetch from Supabase table 'word_color_map' where book_id = this.bookId
+    const { data, error } = await this.supabaseService.client
+      .from('word_color_map')
+      .select('id, word, color')
+      .eq('book_id', this.bookId);
+    if (error || !data) return [];
+    const wordColorMapList: { id: string, word: string, color: string }[] = data;
     this.wordColorMap = wordColorMapList.reduce((acc, item) => {
       acc[item.word] = item.color;
       return acc;

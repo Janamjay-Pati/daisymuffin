@@ -133,12 +133,13 @@ export class EditBook {
         }
 
         const publicUrl = data.publicUrl;
-        this.bookImage = publicUrl;
+        const imageUrl = `${data.publicUrl}?t=${Date.now()}`;
+        this.bookImage = imageUrl;
 
         // **Update the book record in Supabase**
         const { error: updateError } = await this.supabaseService.client
           .from('books')
-          .update({ cover_image: publicUrl })
+          .update({ cover_image: imageUrl })
           .eq('id', bookId);
 
         if (updateError) {

@@ -213,6 +213,7 @@ async addNewBook(): Promise<void> {
 
     // 4️⃣ Refresh carousel images and graph
     await this.fetchBookImages();
+    this.current.set(this.images.length - 1); // focus newly added book
     const books = await this.fetchBooks();
     this.writingRows = await this.getWeeklyWritingRows(books);
     this.cdr.detectChanges();
@@ -306,6 +307,14 @@ async addNewBook(): Promise<void> {
             isArchived: ch.is_archived
           }))
         }
+      });
+
+      this.dialog.afterAllClosed.subscribe(async () => {
+        // Refresh carousel images and graph after dialog is closed
+        await this.fetchBookImages();
+        const books = await this.fetchBooks();
+        this.writingRows = await this.getWeeklyWritingRows(books);
+        this.cdr.detectChanges();
       });
 
     } catch (err) {

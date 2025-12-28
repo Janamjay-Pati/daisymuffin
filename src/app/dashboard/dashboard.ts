@@ -334,7 +334,7 @@ async addNewBook(): Promise<void> {
     const { data, error } = await this.supabaseService.client
       .from('daily_book_stats')
       .select('stat_date, total_words, book_id')
-      .gte('stat_date', fromDate.toISOString().split('T')[0])
+      .gte('stat_date', this.formatDateIST(fromDate))
       .order('stat_date');
 
     if (error) {
@@ -355,7 +355,7 @@ async addNewBook(): Promise<void> {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
 
-      const dateKey = d.toISOString().split('T')[0];
+      const dateKey = this.formatDateIST(d);
       const displayDate = d.toLocaleDateString('en-GB', {
         day: '2-digit',
         month: 'short',
@@ -374,5 +374,11 @@ async addNewBook(): Promise<void> {
     }
 
     return writingRows;
+  }
+
+  formatDateIST(date: Date): string {
+    const istOffsetMs = 5.5 * 60 * 60 * 1000;
+    const istDate = new Date(date.getTime() + istOffsetMs);
+    return istDate.toISOString().split('T')[0];
   }
 }

@@ -287,6 +287,15 @@ export class Editor implements OnInit, OnDestroy {
     this.wordCount = text.trim().split(/\s+/).filter(Boolean).length;
     this.charCount = text.length;
 
+    const quill = this.quillEditorComponent?.quillEditor;
+    if (quill && !this.isHighlighting) {
+      const range = quill.getSelection();
+      if (range && range.length === 0) {
+        quill.format('background', false, 'silent');
+        quill.format('manualHighlight', false, 'silent');
+      }
+    }
+
     if (!this.isHighlighting) {
       this.highlightMapping();
     }

@@ -14,6 +14,34 @@
         <button class="ql-link" title="Add Link"></button>
         <button class="ql-image" title="Add Image"></button>
         <button class="ql-strike" title="Strikethrough"></button>
+        <button
+            mat-icon-button
+            type="button"
+            class="ql-color-picker-btn"
+            style="width: 28px; height: 28px; padding: 0;"
+            title="Text color"
+            (click)="colorPicker.click()">
+            <mat-icon>palette</mat-icon>
+        </button>
+        <input
+            #colorPicker
+            type="color"
+            class="hidden-color-input"
+            (input)="applyColor($event)" />
+        
+        <button
+            mat-icon-button
+            type="button"
+            style="width: 28px; height: 28px; padding: 0;"
+            title="Highlight color"
+            (click)="highlightPicker.click()">
+            <mat-icon>highlight</mat-icon>
+        </button>
+        <input
+            #highlightPicker
+            type="color"
+            class="hidden-color-input"
+            (input)="applyHighlight($event)" />
         <button class="ql-clean" title="Remove all effects"></button>
         <button mat-icon-button type="button" style="width: 28px; height: 28px; padding: 2px;" (click)="undo()" mat-icon-button>
             <mat-icon>undo</mat-icon>

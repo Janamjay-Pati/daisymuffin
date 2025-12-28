@@ -15,6 +15,35 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { ViewEncapsulation } from '@angular/core';
 import { SupabaseService } from '../../services/supabase.service';
+import Quill from 'quill';
+const Inline = Quill.import('blots/inline') as any;
+
+class ManualHighlightBlot extends Inline {
+  static blotName = 'manualHighlight';
+  static tagName = 'span';
+  static className = 'manual-highlight';
+
+  static create(value: string) {
+    const node = super.create();
+    node.style.backgroundColor = value;
+    node.setAttribute('data-manual', 'true');
+    return node;
+  }
+
+  static formats(node: HTMLElement) {
+    return node.style.backgroundColor;
+  }
+
+  format(name: string, value: any) {
+    if (name === 'manualHighlight' && value) {
+      (this as any).domNode.style.backgroundColor = value;
+    } else {
+      super.format(name, value);
+    }
+  }
+}
+
+Quill.register(ManualHighlightBlot, true);
 
 @Component({
   selector: 'app-editor',
@@ -219,15 +248,31 @@ export class Editor implements OnInit, OnDestroy {
   applyHighlight(event: any) {
     const color = event.target.value;
     const quillEditor = this.quillEditorComponent?.quillEditor;
-    if (quillEditor) {
-      const range = quillEditor.getSelection();
-      if (range && range.length > 0) {
-        quillEditor.format('background', color);
-      } else {
-        // Set background for future input
-        quillEditor.format('background', color);
+    if (!quillEditor) return;
+
+    const range = quillEditor.getSelection(true);
+    if (!range || range.length === 0) return;
+
+    this.isHighlighting = true;
+
+    const text = quillEditor.getText();
+
+    // Remove previous manual highlights in the selected range
+    const delta = quillEditor.getContents(range.index, range.length);
+    let indexOffset = 0;
+
+    delta.ops.forEach(op => {
+      const len = typeof op.insert === 'string' ? op.insert.length : 1;
+      if (op.attributes?.['manualHighlight']) {
+        quillEditor.formatText(range.index + indexOffset, len, { manualHighlight: false }, 'silent');
       }
-    }
+      indexOffset += len;
+    });
+
+    // Apply manual highlight to the selected range
+    quillEditor.formatText(range.index, range.length, { manualHighlight: color }, 'user');
+
+    this.isHighlighting = false;
   }
 
   private isHighlighting = false;
@@ -253,14 +298,30 @@ export class Editor implements OnInit, OnDestroy {
     let index = 0;
 
     // Remove previous highlights
-    quillEditor.formatText(0, text.length, { background: null }, 'silent');
+    delta.ops.forEach(op => {
+      const length = typeof op.insert === 'string' ? op.insert.length : 1;
+
+      if (op.attributes?.['data-mapped']) {
+        quillEditor.formatText(index, length, { background: null, 'data-mapped': null }, 'silent');
+      }
+
+      index += length;
+    });
 
     Object.entries(this.wordColorMap).forEach(([word, color]) => {
       const regex = new RegExp(`\\b${word}\\b`, 'gi');
       let match;
       while ((match = regex.exec(text)) !== null) {
         // Only highlight if the match is a whole word
-        quillEditor.formatText(match.index, word.length, { background: color });
+        quillEditor.formatText(
+          match.index,
+          word.length,
+          {
+            background: color,
+            'data-mapped': true
+          },
+          'silent'
+        );
       }
     });
 

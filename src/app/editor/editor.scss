@@ -1,19 +1,26 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* 🔒 kill page scroll */
+}
+
 .editor {
-    background: white;
-    width: 100%;
+  background: white;
+  width: 100%;
+  height: 100vh;           /* exact viewport */
+  display: flex;
+  flex-direction: column; /* toolbar on top, editor below */
+  overflow: hidden;
 }
 
 #custom-toolbar {
     background: white;
     border-bottom: 1px solid #ddd;
-    padding: 10px;
-    position: sticky;
-    top: 0;
+    padding: 0.5rem 0.75rem;
     z-index: 10;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    width: 100%;
     
     .go-back {
       justify-self: start;
@@ -36,6 +43,13 @@
 
 .ql-toolbar .no-padding {
   padding: 0;
+}
+
+/* Keeps the color input invisible but usable */
+.hidden-color-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .focus-toggle {
@@ -64,24 +78,24 @@
 }
 
 .word-count {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: fixed;      /* stick to viewport bottom */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;    /* or center/left as needed */
   font-size: 0.9rem;
   color: #666;
   background-color: white;
-  padding: 2px 6px;      /* optional: small padding for readability */
-  border-radius: 4px;    /* optional: subtle rounding */
-  white-space: nowrap;    /* prevent breaking the text */
-  z-index: 5;
+  padding: 0.5rem 1rem; /* enough padding for readability */
+  border-top: 1px solid #ddd;
+  z-index: 10;
+  box-sizing: border-box;
 }
 
 .ql-container {
-  background: #fff;
-  height: calc(100vh - 6.4rem);
-  border: none;
-  padding: 2rem 0;
+  height: calc(100vh - var(--toolbar-height, 56px));
+  overflow-y: auto;
+  padding-bottom: 2.5rem; /* same as word-count height + some spacing */
 }
 
 .ql-editor {
@@ -160,10 +174,6 @@ body.dark-mode {
 /* Responsive adjustments for small screens */
 @media (max-width: 768px) {
 
-  .ql-container {
-    height: calc(100vh - 10.25rem);
-  }
-
   /* Toolbar wraps on smaller screens */
   #custom-toolbar {
     flex-wrap: wrap;              /* Allow buttons to wrap */
@@ -203,8 +213,7 @@ body.dark-mode {
   }
 
   /* Chapter name and word count */
-  .chapter-name,
-  .word-count {
+  .chapter-name {
     font-size: 0.8rem;
     padding: 1px 4px;
     bottom: 8px;

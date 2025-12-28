@@ -10,7 +10,13 @@ export class SupabaseService {
   constructor() {
     this.supabase = createClient(
       'https://sxqfecnxbpnitbuyyuov.supabase.co',
-      'sb_publishable_weO-WfYKkZqLY1QYjoTayQ_hIsoenYJ'
+      'sb_publishable_weO-WfYKkZqLY1QYjoTayQ_hIsoenYJ',
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+        },
+      }
     );
   }
 

@@ -31,16 +31,10 @@ export class SupabaseService {
   }
 
   async signInWithGoogle() {
-    const redirectUrl =
-      window.location.hostname === 'localhost'
-        ? 'http://localhost:3000'
-        : 'https://daisymuffin.vercel.app';
-
     const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: redirectUrl }
+      options: { redirectTo: window.location.origin }
     });
-
     if (error) console.error('Google login error:', error);
   }
 

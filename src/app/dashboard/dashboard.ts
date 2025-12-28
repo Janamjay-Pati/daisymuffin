@@ -134,6 +134,7 @@ export class Dashboard {
     const reader = new FileReader();
     reader.onload = () => {
       this.newBookImage = reader.result as string;
+      this.cdr.detectChanges();
     };
     reader.readAsDataURL(file);
 

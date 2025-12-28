@@ -117,6 +117,11 @@ export class Editor implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     });
+
+    const toolbarEl = document.getElementById('custom-toolbar');
+    if (!toolbarEl) return;
+
+    toolbarEl.style.setProperty('--toolbar-icon-color', '#444444');
   }
 
   ngOnDestroy() {
@@ -565,11 +570,16 @@ export class Editor implements OnInit, OnDestroy {
   }
 
   toggleDarkMode() {
+    const toolbarEl = document.getElementById('custom-toolbar');
+    if (!toolbarEl) return;
+
     this.darkMode = !this.darkMode;
     if (this.darkMode) {
       document.body.classList.add('dark-mode');
+      toolbarEl.style.setProperty('--toolbar-icon-color', '#ffffff');
     } else {
       document.body.classList.remove('dark-mode');
+      toolbarEl.style.setProperty('--toolbar-icon-color', '#444444');
     }
   }
 

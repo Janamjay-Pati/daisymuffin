@@ -39,6 +39,12 @@ html, body {
       background: transparent;
       cursor: pointer;
     }
+
+    button mat-icon {
+      color: var(--toolbar-icon-color, black);
+      transition: color 0.2s ease;
+      font-size: large;
+    }
   }
 
 .ql-toolbar .no-padding {

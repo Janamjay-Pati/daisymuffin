@@ -14,6 +14,7 @@
         <button class="ql-link" title="Add Link"></button>
         <button class="ql-image" title="Add Image"></button>
         <button class="ql-strike" title="Strikethrough"></button>
+        <button class="ql-clean" title="Remove all effects"></button>
         <button
             mat-icon-button
             type="button"
@@ -42,7 +43,6 @@
             type="color"
             class="hidden-color-input"
             (input)="applyHighlight($event)" />
-        <button class="ql-clean" title="Remove all effects"></button>
         <button mat-icon-button type="button" style="width: 28px; height: 28px; padding: 2px;" (click)="undo()" mat-icon-button>
             <mat-icon>undo</mat-icon>
         </button>

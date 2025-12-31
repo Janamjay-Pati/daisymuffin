@@ -74,7 +74,7 @@ export class Dashboard {
 
   get progressText() {
     const next = this.nextBadge;
-    if (!next && this.badges.length) return 'All badges unlocked 👑';
+    if (!next) return 'All badges unlocked 👑';
 
     return `${this.totalWords.toLocaleString()} / ${next.threshold.toLocaleString()} words for "${next.name}" Badge`;
   }

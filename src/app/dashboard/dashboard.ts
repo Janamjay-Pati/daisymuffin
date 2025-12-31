@@ -32,6 +32,8 @@ type DailyBookStatRow = {
 export class Dashboard {
   constructor(private dialog: MatDialog, private supabaseService: SupabaseService, private router: Router, private cdr: ChangeDetectorRef) {}
 
+  badges : any[] = [];
+
   writingRows: any[] = [];
 
   public readonly title = signal('Name');
@@ -54,12 +56,39 @@ export class Dashboard {
 
   private readonly intervalMs = 3000; // rotate every 3s
 
+  totalWords: number = 0;
+
+  get nextBadge() {
+    return this.badges.find(b => this.totalWords < b.threshold);
+  }
+
+  get progressPercent() {
+    const next = this.nextBadge;
+    if (!next) return 100;
+
+    return Math.min(
+      (this.totalWords / next.threshold) * 100,
+      100
+    );
+  }
+
+  get progressText() {
+    const next = this.nextBadge;
+    if (!next) return 'All badges unlocked 👑';
+
+    return `${this.totalWords.toLocaleString()} / ${next.threshold.toLocaleString()} words for "${next.name}" Badge`;
+  }
+
   async ngOnInit(): Promise<void> {
     await this.fetchBookImages();  // fetch images first
     this.start();
 
     const books = await this.fetchBooks();
     this.writingRows = await this.getWeeklyWritingRows(books);
+
+    this.totalWords = this.writingRows.reduce((sum, row) => sum + row.words, 0);
+    await this.fetchBadges();
+    this.updateBadgeStatus(this.totalWords);
 
     // Subscribe to realtime changes
     this.statsSubscription = this.supabaseService.client
@@ -70,6 +99,11 @@ export class Dashboard {
         (payload: RealtimePostgresChangesPayload<any>) => {
           console.log('Realtime update:', payload);
           this.refreshGraph(); // Re-fetch latest weekly rows
+
+          // Recalculate total words after refresh
+        const totalWords = this.writingRows.reduce((sum, row) => sum + row.words, 0);
+        this.fetchBadges();
+        this.updateBadgeStatus(totalWords);
         }
       )
       .subscribe();
@@ -78,6 +112,31 @@ export class Dashboard {
   async logout() {
     await this.supabaseService.logout();
     this.router.navigate(['/auth']);
+  }
+
+  async fetchBadges() {
+    const { data, error } = await this.supabaseService.client
+      .from('badges')
+      .select('*')
+      .order('threshold');
+
+    if (error) {
+      console.error('Error fetching badges', error);
+      return;
+    }
+
+    this.badges = data.map(b => ({
+      ...b,
+      unlocked: false
+    }));
+
+    console.log('Fetched badges:', this.badges);
+  }
+
+  updateBadgeStatus(totalWords: number) {
+    this.badges.forEach(badge => {
+      badge.unlocked = totalWords >= badge.threshold;
+    });
   }
 
   async fetchBookImages(): Promise<void> {

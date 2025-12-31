@@ -101,3 +101,35 @@
     </div>
   </div>
 </div>
+
+<mat-toolbar color="primary">
+  <span style="text-align: center; width: 100%;">Badges</span>
+</mat-toolbar>
+
+<div class="badge-progress-wrapper">
+  <div class="badge-progress-text">
+    {{ progressText }}
+  </div>
+
+  <div class="badge-progress-bar">
+    <div
+      class="badge-progress-fill"
+      [style.width.%]="progressPercent"
+    ></div>
+  </div>
+</div>
+
+<div class="badges-section badges-grid">
+  @for (badge of badges; track badge.id) {
+    <div class="badge-item">
+      <img
+        class="badge"
+        [attr.src]="badge.image_url"
+        [class.locked]="!badge.unlocked"
+      />
+      <div class="badge-info">
+        <span class="badge-text">{{ badge.milestoneText }}</span>
+      </div>
+    </div>
+  }
+</div>

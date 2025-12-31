@@ -325,6 +325,72 @@
   }
 }
 
+/* ===== Badges Grid ===== */
+.badges-section {
+  padding: 16px;
+  background-color: white;
+}
+
+ .badges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 5 columns */
+  grid-template-rows: repeat(5, auto);   /* 3 rows */
+  gap: 20px;
+  justify-items: center;
+  align-items: center;
+}
+
+/* Badge image size */
+.badge {
+  width: 20rem;   /* larger badges */
+  height: 20rem;
+  object-fit: contain;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+/* Locked (greyed out) state */
+.badge.locked {
+  filter: grayscale(100%);
+}
+
+.badge-info {
+  text-align: center;
+  margin-top: 8px;
+  font-weight: 500;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* ===== Badge Progress ===== */
+
+.badge-progress-wrapper {
+  width: 100%;
+  background: white;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.badge-progress-text {
+  text-align: center;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.85;
+}
+
+.badge-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.badge-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6a5acd, #00d4ff);
+  transition: width 0.4s ease;
+}
+
 /* Mobile adjustments */
 @media (max-width: 600px) {
   .graph-section { margin: 1rem auto 2rem auto; padding: 0 0.6rem; }
@@ -370,6 +436,45 @@
     display: flex;
     justify-content: center;  /* button centered below form */
     margin-top: 16px;
+  }
+
+  /* ===== Badges – Mobile Responsive ===== */
+
+  .badges-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 per row on mobile */
+    grid-template-rows: auto;
+    gap: 12px;
+  }
+
+  .badge {
+    width: 9rem;
+    height: 9rem;
+  }
+
+  .badge-info {
+    font-size: 0.75rem;
+    margin-top: 4px;
+  }
+
+  /* Center lone badge in last row when count is odd */
+  .badges-grid > .badge-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+
+  .badge-progress-wrapper {
+    margin: 0;               /* remove auto margins */
+    padding: 0.75rem 1rem;   /* controlled spacing */
+  }
+
+  .badge-progress-text {
+    font-size: 0.8rem;
+    line-height: 1.2;
+  }
+
+  .badge-progress-bar {
+    height: 6px;
+    border-radius: 4px;
   }
 
 }

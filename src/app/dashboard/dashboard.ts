@@ -72,7 +72,15 @@ export class Dashboard {
     );
   }
 
+  // New helper to know when every badge is unlocked
+  get allBadgesUnlocked() {
+    return this.badges.length > 0 && this.badges.every(b => b.unlocked);
+  }
+
   get progressText() {
+    // don't show 'All badges unlocked' when badges haven't been loaded
+    if (this.badges.length === 0) return '';
+
     const next = this.nextBadge;
     if (!next) return 'All badges unlocked 👑';
 
@@ -114,9 +122,10 @@ export class Dashboard {
           this.refreshGraph(); // Re-fetch latest weekly rows
 
           // Recalculate total words after refresh
-        const totalWords = await this.fetchTotalWords();
-        this.fetchBadges();
-        this.updateBadgeStatus(totalWords);
+          const totalWords = await this.fetchTotalWords();
+          this.totalWords = totalWords;
+          await this.fetchBadges();
+          this.updateBadgeStatus(totalWords);
         }
       )
       .subscribe();

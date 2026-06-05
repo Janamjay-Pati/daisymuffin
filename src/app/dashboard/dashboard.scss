@@ -345,12 +345,23 @@
   width: 20rem;   /* larger badges */
   height: 20rem;
   object-fit: contain;
-  transition: filter 0.2s ease, opacity 0.2s ease;
+  transition: filter 0.3s ease, opacity 0.3s ease, transform 0.25s ease;
+  filter: grayscale(100%); /* default to grey */
+  opacity: 0.6;
 }
 
 /* Locked (greyed out) state */
 .badge.locked {
-  filter: grayscale(100%);
+  filter: grayscale(100%) brightness(0.7) saturate(0.4);
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+
+/* Unlocked: remove filter */
+.badge:not(.locked) {
+  filter: none;
+  opacity: 1;
+  transform: scale(1);
 }
 
 .badge-info {

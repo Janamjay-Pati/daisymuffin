@@ -1,9 +1,15 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* prevent vertical scroll on login */
+}
+
 .authentication {
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 100vh; // safer than height on mobile
-  padding: 16px; // 👈 prevents edge overflow on small screens
+  justify-content: center;
+  overflow: hidden; /* critical */
 
   .auth-container {
     width: 100%;
@@ -11,8 +17,7 @@
     margin: 0 auto;
     padding: 2.5rem;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2),
-                0 6px 20px rgba(0, 0, 0, 0.19);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19);
 
     .title {
       font-weight: bold;

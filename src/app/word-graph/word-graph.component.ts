@@ -2,7 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges, AfterViewInit, OnDestroy, V
 import { CommonModule } from '@angular/common';
 import Chart from 'chart.js/auto';
 
-type RawEntry = { date: string; book: string; words: number };
+type RawEntry = { date: string; isoDate: string; book: string; words: number };
 
 @Component({
   selector: 'word-graph',
@@ -80,14 +80,25 @@ export class WordGraphComponent implements OnChanges, AfterViewInit, OnDestroy {
   }
 
   private buildData() {
-    const dates = Array.from(new Set(this.raw.map(r => r.date))).sort();
+    // Use ISO dates (YYYY-MM-DD) for all ordering & grouping
+    const isoDates = Array.from(new Set(this.raw.map(r => r.isoDate)))
+      .sort((a, b) => a.localeCompare(b));
+
+    const labels = isoDates.map(d =>
+      new Date(d).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
+    );
+
     const books = Array.from(new Set(this.raw.map(r => r.book)));
 
     const byBook = new Map<string, number[]>();
-    books.forEach(b => byBook.set(b, dates.map(() => 0)));
+    books.forEach(b => byBook.set(b, isoDates.map(() => 0)));
 
     this.raw.forEach(r => {
-      const i = dates.indexOf(r.date);
+      const i = isoDates.indexOf(r.isoDate);
       if (i >= 0) byBook.get(r.book)![i] += r.words;
     });
 
@@ -101,7 +112,7 @@ export class WordGraphComponent implements OnChanges, AfterViewInit, OnDestroy {
       pointRadius: 4
     }));
 
-    return { labels: dates, datasets };
+    return { labels, datasets };
   }
 
   private pickColor(i: number) {

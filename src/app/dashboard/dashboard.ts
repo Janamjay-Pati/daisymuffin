@@ -79,6 +79,19 @@ export class Dashboard {
     return `${this.totalWords.toLocaleString()} / ${next.threshold.toLocaleString()} words for "${next.name}" Badge`;
   }
 
+  async fetchTotalWords(): Promise<number> {
+    const { data, error } = await this.supabaseService.client
+      .from('daily_book_stats')
+      .select('total_words');
+
+    if (error) {
+      console.error('Error fetching total words', error);
+      return 0;
+    }
+
+    return data.reduce((sum, row) => sum + row.total_words, 0);
+  }
+
   async ngOnInit(): Promise<void> {
     await this.fetchBookImages();  // fetch images first
     this.start();
@@ -86,7 +99,7 @@ export class Dashboard {
     const books = await this.fetchBooks();
     this.writingRows = await this.getWeeklyWritingRows(books);
 
-    this.totalWords = this.writingRows.reduce((sum, row) => sum + row.words, 0);
+    this.totalWords = await this.fetchTotalWords();
     await this.fetchBadges();
     this.updateBadgeStatus(this.totalWords);
 
@@ -96,12 +109,12 @@ export class Dashboard {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'daily_book_stats' },
-        (payload: RealtimePostgresChangesPayload<any>) => {
+        async (payload: RealtimePostgresChangesPayload<any>) => {
           console.log('Realtime update:', payload);
           this.refreshGraph(); // Re-fetch latest weekly rows
 
           // Recalculate total words after refresh
-        const totalWords = this.writingRows.reduce((sum, row) => sum + row.words, 0);
+        const totalWords = await this.fetchTotalWords();
         this.fetchBadges();
         this.updateBadgeStatus(totalWords);
         }
@@ -384,7 +397,7 @@ async addNewBook(): Promise<void> {
   // example data to feed the graph
   async getWeeklyWritingRows(
     books: { id: string; title: string }[]
-  ): Promise<{ date: string; book: string; words: number }[]> {
+  ): Promise<{ date: string; isoDate: string; book: string; words: number }[]> {
 
     const today = new Date();
     const fromDate = new Date();
@@ -408,11 +421,14 @@ async addNewBook(): Promise<void> {
       dbMap.set(key, row.total_words);
     });
 
-    const writingRows: { date: string; book: string; words: number }[] = [];
+    const writingRows: { date: string; isoDate: string; book: string; words: number }[] = [];
 
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - 6);
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
 
       const dateKey = this.formatDateIST(d);
       const displayDate = d.toLocaleDateString('en-GB', {
@@ -426,18 +442,18 @@ async addNewBook(): Promise<void> {
 
         writingRows.push({
           date: displayDate,
+          isoDate: dateKey,
           book: book.title,
           words: dbMap.get(key) ?? 0
         });
       }
     }
 
+    writingRows.sort((a, b) => a.isoDate.localeCompare(b.isoDate));
     return writingRows;
   }
 
   formatDateIST(date: Date): string {
-    const istOffsetMs = 5.5 * 60 * 60 * 1000;
-    const istDate = new Date(date.getTime() + istOffsetMs);
-    return istDate.toISOString().split('T')[0];
+      return date.toLocaleDateString('en-CA');
   }
 }

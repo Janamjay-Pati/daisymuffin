@@ -27,7 +27,7 @@ type DailyBookStatRow = {
   selector: 'app-dashboard',
   imports: [CommonModule, WordGraphComponent, MatToolbarModule, MatIconModule, MatButtonModule, MatTooltipModule, MatFormField, FormsModule, MatInputModule],
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss',
+  styleUrls: ['./dashboard.scss'],
 })
 export class Dashboard {
   constructor(private dialog: MatDialog, private supabaseService: SupabaseService, private router: Router, private cdr: ChangeDetectorRef) {}
@@ -153,12 +153,16 @@ export class Dashboard {
     }));
 
     console.log('Fetched badges:', this.badges);
+    // Ensure template updates immediately after badges arrive
+    this.cdr.detectChanges();
   }
 
   updateBadgeStatus(totalWords: number) {
     this.badges.forEach(badge => {
       badge.unlocked = totalWords >= badge.threshold;
     });
+    // Force change detection so bindings (locked class, progress) update
+    this.cdr.detectChanges();
   }
 
   async fetchBookImages(): Promise<void> {
